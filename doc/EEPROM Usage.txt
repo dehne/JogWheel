@@ -1,0 +1,112 @@
+Jogwheel EEPROM usage.
+
+Header block. Starts at EEPROM 0. Below, each character is one nibble.
+ffff	Fingerprint: 0xC29C
+nn		Number of currently selected config
+0000	Starting EEPROM address for config 0 (Built in, can't be changed.)
+1111	Starting EEPROM address for config 1. 0 ==> no such config (or any higher numbered ones)
+2222	"
+3333	"
+4444	"
+5555	"
+6666	"
+7777	"
+
+Config block (Starts at EEPROM addr given in header block.)
+ee		Count of entries that follow
+aaaa	Entry 0 cw
+bbbb	Entry 0 cc
+cccc	Entry 1 cw
+dddd	Entry 1 cc
+
+...
+
+nnnn	Entry ee - 1 cw
+mmmm	Entry ee - 1 cc
+
+Format of an entry. Each character is a bit
+fbbb bbbb bbbb bbbb
+
+f = 0 ==> entry is for keyboard
+  = 1 ==> entry is for mouse
+  
+Keyboard entry format
+=====================
+
+0xxx casg vvvv vvvv
+
+Where 
+0 ==> Always zero
+x ==> Reserved -- set to 0
+c ==> ctrl held down
+a ==> alt held down
+s ==> shift held down
+g ==> GUI-specific modifier held down (e.g., opt-key for IOS, windows-key for Windows)
+vvvv vvvv is the value of the keystroke to send
+0 .. 127	ASCII char (note that many non printing chars can't be sent by a keyboard. See asciimap in Keyboard.cpp)
+> 127		Non-printing key (see list in Keyboard.h. The ones above 0x87 are the non-printing keys.)
+
+Mouse entry format
+==================
+
+1xnn ffff vvvv vvvv
+
+Where
+1 ==> Always 1
+x ==> Reserved -- set to 0
+nn ==> Type of mouse entry
+ffff ==> flags meanding depends on type
+vvvv vvvv is the content of the entry; meaning depends on type.
+
+Type 0 mouse entry -- move the mouse wheel
+------------------------------------------
+ffff vvvv vvvv
+casg vvvv vvvv
+
+Where
+c ==> ctrl held down
+a ==> alt held down
+s ==> shift held down
+g ==> GUI-specific modifier held down (e.g., opt for IOS, windows key for Windows)
+vvvv vvvv is the signed amount to move the mouse wheel
+
+Type 1 mouse entry -- X-distance specification
+----------------------------------------------
+ffff vvvv vvvv
+xlmr vvvv vvvv
+
+Where
+x ==> Reserved -- set to 0
+l ==> Left mouse button is down during this move
+m ==> Middle mouse button is down during this move
+r ==> Right mouse button is down duroing this move
+vvvv vvvv is the signed amount to move the mouse in the x-direction
+
+Note that a type 1 mouse entry does not actually move the mouse, it just sets the x amount. Movement happens at the next type 2 mouse entry.
+
+Type 2 mouse entry -- Y-distance specification
+----------------------------------------------
+ffff vvvv vvvv
+casg vvvv vvvv
+
+Where
+c ==> ctrl held down
+a ==> alt held down
+s ==> shift held down
+g ==> GUI-specific modifier held down (e.g., opt for IOS, windows key for Windows)
+vvvv vvvv is the signed amount to move the mouse in the y-direction
+
+Note that a type 2 mouse entry moves the mouse in both x and y. The x amount used is that from the previous type 1 mouse entry (or 0 if there was none). Following the move, any the modifiers (mouse buttons or keyboard keys like Shift) are released.
+
+Type 3 mouse entry -- click a mouse button
+-----------------------------------------------
+ffff vvvv vvvv
+casg xxxx xnnn
+
+Where
+x ==> Reserved -- set to 0
+c ==> ctrl held down
+a ==> alt held down
+s ==> shift held down
+g ==> GUI-specific modifier held down (e.g., opt for IOS, windows key for Windows)
+nnn ==> The button(s) being clicked = 1 ==> left, = 4 ==> middle, = 2 ==> right, = 3
