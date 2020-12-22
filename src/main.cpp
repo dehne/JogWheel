@@ -12,7 +12,7 @@
  * The ends of the coils are exposed as the motor's leads. Because the motor 
  * is designed to spin, the coils and magnets are arranged so that the magnets 
  * pass the coils at different times as the shaft spins, this makes it 
- * possible to drive the motor by sequentially energizing and deenregizing the 
+ * possible to drive the motor by sequentially energizing and deenergizing the 
  * coils with the correct polarity and timing. Here, though, we take advantage 
  * of the fact that if you turn the stepper's shaft, it moves magnets past the 
  * coils. Doing that induces voltage pulses across the coils. By sensing the 
@@ -23,7 +23,7 @@
  * deceased printer. The ends of its two coils, A and B, are exposed as four 
  * wires, A-, A+, B- and B+. When the shaft is turned clockwise, a pulse first 
  * appears on coil A and then on B. When it's turned counterclockwise, the 
- * pulse on B preceeds the one on A. A bit of passive support circuitry cleans 
+ * pulse on B precedes the one on A. A bit of passive support circuitry cleans 
  * up the shape of the pulses, ensures the pulses don't go below about -0.6v 
  * and aren't bigger than about 4.5v. (Not surprisingly, the voltage pulses 
  * coming directly out of the motor go in both positive and negative 
